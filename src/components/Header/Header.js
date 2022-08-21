@@ -1,22 +1,33 @@
 import React from "react";
 import Euronetlogo from "./Euronetlogo.png";
 import { Container, Navbar, Badge } from "react-bootstrap";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleUser } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleUser } from "@fortawesome/free-solid-svg-icons";
+import Cookies from "js-cookie";
 
 function Header(props) {
   return (
     <div>
-    
       <Navbar>
-      <Container style={{display:"flex", justifyContent: "space-between"}}>
-        <Navbar.Brand href="#">
-          <img src={Euronetlogo} alt="Euronetlogo" />
-        </Navbar.Brand>
-        <h3 style={{alignSelf: "end", margin:"0"}}><Badge pill bg="light" style={{color: "gray"}}><FontAwesomeIcon icon={faCircleUser} /> User X</Badge></h3>
+        <Container style={{ display: "flex", justifyContent: "space-between" }}>
+          <Navbar.Brand href="#">
+            <img src={Euronetlogo} alt="Euronetlogo" />
+          </Navbar.Brand>
+          <h3 style={{ alignSelf: "end", margin: "0" }}>
+            {Cookies.get("candidate_email") ? (
+              <Badge bg="light" style={{ color: "gray" }}>
+                <FontAwesomeIcon icon={faCircleUser} />{" "}
+                {Cookies.get("candidate_email").substring(
+                  0,
+                  Cookies.get("candidate_email").lastIndexOf("@")
+                )}
+              </Badge>
+            ) : (
+              ""
+            )}
+          </h3>
         </Container>
       </Navbar>
-
     </div>
   );
 }
