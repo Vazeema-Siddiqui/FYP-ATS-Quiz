@@ -48,18 +48,18 @@ function AptTest() {
         .post(
           `https://atsbackend.herokuapp.com/api/testresult/addcandtestresult`,
           {
-            cand_id: cand_id,
-            job_id: job_id,
-            oop_score: categorizeScore.oop,
-            ds_score: categorizeScore.ds,
-            gk_score: categorizeScore.gk,
-            other_score: categorizeScore.other,
-            total_score: total_score,
+            // cand_id: cand_id,
+            // job_id: job_id,
+            // oop_score: categorizeScore.oop,
+            // ds_score: categorizeScore.ds,
+            // gk_score: categorizeScore.gk,
+            // other_score: categorizeScore.other,
+            // total_score: total_score,
           }
         )
         .then((res) => {
           if (res.status == 200) {
-            Cookies.set("candidate_email", cand_email);
+            // Cookies.set("candidate_email", cand_email);
             navigate("/aptitude-test");
           } else if (res.status == 500) {
             // handleFailureShow();

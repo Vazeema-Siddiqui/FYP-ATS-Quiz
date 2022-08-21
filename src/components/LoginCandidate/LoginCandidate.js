@@ -12,6 +12,7 @@ export default function LoginCandidate() {
   const handleErrorShow = () => setShowError(true);
   const handleErrorClose = () => setShowError(false);
   const handleFailureShow = () => setShowFailure(true);
+  const handleFailureClose = () => setShowFailure(false);
   const [modalError, setModalError] = useState("");
   const [showFailure, setShowFailure] = useState(false);
 
@@ -37,8 +38,8 @@ export default function LoginCandidate() {
     }
   };
   return (
-    <div className="login">
-      <Card>
+    <div className="login col-sm-9 col-md-8 col-lg-7">
+      <Card style={{ boxShadow: "rgba(0, 0, 0, 0.5) 0px 3px 8px" }}>
         <Card.Header
           as="h6"
           style={{ backgroundColor: "rgb(0, 51, 153)", color: "white" }}
@@ -48,17 +49,10 @@ export default function LoginCandidate() {
         <Card.Body
           style={{ backgroundColor: "rgb(204, 204, 204)", color: "white" }}
         >
-          <Form
-            style={{
-              fontSize: "small",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Form.Group style={{ width: "60%" }} controlId="formBasicEmail">
+          <Form style={{ paddingLeft: "0.5em", paddingRight: "0.5em" }}>
+            <Form.Group controlId="formBasicEmail">
               <Form.Label
-                style={{ color: "gray", fontWeight: "bold", textAlign: "left" }}
+                style={{ color: "gray", fontWeight: "bold", margin: "0", float: "left" }}
               >
                 Email
               </Form.Label>
@@ -75,7 +69,6 @@ export default function LoginCandidate() {
               </Form.Label>
               <Form.Control type="password" placeholder="Password" />
             </Form.Group> */}
-            <br />
           </Form>
 
           <Button
@@ -83,6 +76,8 @@ export default function LoginCandidate() {
               backgroundColor: "rgb(0, 51, 153)",
               color: "white",
               float: "right",
+              marginTop: "1em",
+              marginRight: "0.5em"
             }}
             onClick={processVerifcation}
           >
@@ -99,6 +94,17 @@ export default function LoginCandidate() {
         keyboard={false}
         centered
       >
+        <Modal contentClassName="modalFailure" show={showFailure} onHide={handleFailureClose} backdrop="static" keyboard={false} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Failure</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Something Went Wrong. Try Again.</Modal.Body>
+          <Modal.Footer>
+            <Button variant="danger" onClick={handleFailureClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
         <Modal.Header closeButton>
           <Modal.Title>Error</Modal.Title>
         </Modal.Header>
