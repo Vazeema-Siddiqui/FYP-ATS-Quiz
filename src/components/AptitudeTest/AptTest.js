@@ -21,6 +21,11 @@ function AptTest() {
   const [isSelected, setSelected] = useState(false);
   const { question, answer, category, options } = test[currentIndex] || {};
 
+  var candID = Cookies.get("candidate_id");
+  const [jobID, setJobID] = useState("");
+
+  const [totalScore, setTotalScore] = useState(0);
+
   const [categorizeScore, setcategorizeScore] = useState({
     oop: 0,
     ds: 0,
@@ -39,8 +44,21 @@ function AptTest() {
       } else {
         categorizeScore.other += 1;
       }
+      setTotalScore(prevScore => prevScore + 1);
     }
   };
+
+  useEffect(function getCandDetails() {
+    axios
+      .get("https://atsbackend.herokuapp.com/api/candinfo/getcandinfo/" + candID)
+      .then((response) => {
+        setJobID(response.data.getCand[0].job_id);
+      })
+      .catch((error) => {
+        console.error("Error fetching data: ", error);
+      });
+  }, []);
+
 
   const submitTest = async (event) => {
     try {
@@ -48,19 +66,18 @@ function AptTest() {
         .post(
           `https://atsbackend.herokuapp.com/api/testresult/addcandtestresult`,
           {
-            // cand_id: cand_id,
-            // job_id: job_id,
-            // oop_score: categorizeScore.oop,
-            // ds_score: categorizeScore.ds,
-            // gk_score: categorizeScore.gk,
-            // other_score: categorizeScore.other,
-            // total_score: total_score,
+            cand_id: candID,
+            job_id: jobID,
+            oop_score: categorizeScore.oop,
+            ds_score: categorizeScore.ds,
+            gk_score: categorizeScore.gk,
+            other_score: categorizeScore.other,
+            total_score: totalScore,
           }
         )
         .then((res) => {
           if (res.status == 200) {
-            // Cookies.set("candidate_email", cand_email);
-            navigate("/aptitude-test");
+            navigate("/result", { state: { candID: candID, jobID: jobID } });
           } else if (res.status == 500) {
             // handleFailureShow();
             alert("Internal Server Error: Response Status 500");
@@ -86,18 +103,19 @@ function AptTest() {
       test.map((item, index) =>
         index === indexSelected
           ? {
-              ...item,
-              selected: true,
-              options: options.map((item, index) =>
-                index === indexOptionSelected
-                  ? { ...item, selected: true }
-                  : { ...item, selected: false }
-              ),
-            }
+            ...item,
+            selected: true,
+            options: options.map((item, index) =>
+              index === indexOptionSelected
+                ? { ...item, selected: true }
+                : { ...item, selected: false }
+            ),
+          }
           : item
       )
     );
   };
+
   const MINUTES = 60 * 60;
   const time = new Date();
   time.setSeconds(time.getSeconds() + MINUTES);
@@ -105,11 +123,13 @@ function AptTest() {
   const { seconds, minutes, hours, start } = useTimer({
     ...(test && { expiryTimestamp: time }),
     autoStart: false,
-    onExpire: () => setCurrentIndex(test.length - 1),
+    onExpire: () => submitTest(),
   });
+
   useEffect(() => {
     start();
-  });
+  }, []);
+
   useEffect(function getTest() {
     axios
       .get("https://atsbackend.herokuapp.com/api/aptTest/getapttests")
@@ -117,20 +137,20 @@ function AptTest() {
         const testData = response.data.getAllAptTest;
         setTest(
           testData &&
-            testData.map((test) => {
-              return {
-                id: test.aptTest_id,
-                question: test.aptTest_question,
-                answer: test.aptTest_answer,
-                category: test.aptTest_category,
-                options: [
-                  { text: test.aptTest_optionA },
-                  { text: test.aptTest_optionB },
-                  { text: test.aptTest_optionC },
-                  { text: test.aptTest_optionD },
-                ],
-              };
-            })
+          testData.map((test) => {
+            return {
+              id: test.aptTest_id,
+              question: test.aptTest_question,
+              answer: test.aptTest_answer,
+              category: test.aptTest_category,
+              options: [
+                { text: test.aptTest_optionA },
+                { text: test.aptTest_optionB },
+                { text: test.aptTest_optionC },
+                { text: test.aptTest_optionD },
+              ],
+            };
+          })
         );
       })
       .catch((error) => {
@@ -157,7 +177,9 @@ function AptTest() {
             style={{ boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px" }}
           >
             <Card.Header as="h5" style={{ textAlign: "left" }}>
-              {question}
+              <div
+                dangerouslySetInnerHTML={{ __html: question }}
+              />
             </Card.Header>
             <Card.Body>
               <ListGroup style={{ textAlign: "left" }}>
@@ -198,7 +220,8 @@ function AptTest() {
                   setSelected(false);
                   checkData(question, answer, category);
                   e.preventDefault();
-                  navigate(`/result`);
+                  // navigate(`/result`);
+                  submitTest();
                 }}
               >
                 Submit
@@ -206,6 +229,11 @@ function AptTest() {
             ) : (
               <Button
                 className="col-sm-2"
+                style={{
+                  backgroundColor: "rgb(6, 89, 167)",
+                  color: "white",
+                  
+                }}
                 disabled={!isSelected}
                 onClick={() => {
                   setSelected(false);

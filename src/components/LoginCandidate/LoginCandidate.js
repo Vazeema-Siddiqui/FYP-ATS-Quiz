@@ -25,6 +25,8 @@ export default function LoginCandidate() {
         .then((res) => {
           if (res.status == 200) {
             Cookies.set("candidate_email", cand_email);
+            Cookies.set("candidate_id", res.data.getCand[0].cand_id);
+            console.log(Cookies.get("candidate_id"));
             navigate("/aptitude-test");
           } else if (res.status == 500) {
             handleFailureShow();
@@ -63,17 +65,11 @@ export default function LoginCandidate() {
                 placeholder="Enter registered email"
               />
             </Form.Group>
-            {/* <Form.Group style={{ width: "90%" }} controlId="formBasicPassword">
-              <Form.Label style={{ color: "gray", fontWeight: "bold" }}>
-                Password
-              </Form.Label>
-              <Form.Control type="password" placeholder="Password" />
-            </Form.Group> */}
           </Form>
 
           <Button
             style={{
-              backgroundColor: "rgb(0, 51, 153)",
+              backgroundColor: "rgb(6, 89, 167)",
               color: "white",
               float: "right",
               marginTop: "1em",
