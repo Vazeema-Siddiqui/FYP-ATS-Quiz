@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import "./login.css";
+import "./modal.css";
 import axios from "axios";
 import { Card, Button, Form, Modal } from "react-bootstrap";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
 export default function LoginCandidate() {
@@ -17,27 +18,34 @@ export default function LoginCandidate() {
   const [showFailure, setShowFailure] = useState(false);
 
   const processVerifcation = async (event) => {
-    try {
-      axios
-        .post(`https://atsbackend.herokuapp.com/api/candinfo/verifycandidate`, {
-          verify_cand_email: cand_email,
-        })
-        .then((res) => {
-          if (res.status == 200) {
-            Cookies.set("candidate_email", cand_email);
-            Cookies.set("candidate_id", res.data.getCand[0].cand_id);
-            console.log(Cookies.get("candidate_id"));
-            navigate("/aptitude-test");
-          } else if (res.status == 500) {
-            handleFailureShow();
-          } else {
-            handleFailureShow();
-          }
-        });
-    } catch (error) {
-      handleErrorShow();
-      setModalError(error);
-    }
+    event.preventDefault();
+
+    axios
+      .post(`https://atsbackend.herokuapp.com/api/candinfo/verifycandidate`, {
+        verify_cand_email: cand_email,
+      })
+      .then((res) => {
+        console.log(res);
+        if (res.status == 200) {
+          Cookies.set("candidate_email", cand_email);
+          Cookies.set("candidate_id", res.data.getCand[0].cand_id);
+          console.log(Cookies.get("candidate_id"));
+          navigate("/aptitude-test", { replace: true });
+          // } else if (res.status == 500) {
+          //   handleFailureShow();
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+        if (error.response) {
+          // Request made and server responded
+          // console.log(error.response.data);
+          // console.log(error.response.status);
+          // console.log(error.response.headers);
+          handleFailureShow();
+        }
+        
+      });
   };
   return (
     <div className="login col-sm-9 col-md-8 col-lg-7">
@@ -82,6 +90,19 @@ export default function LoginCandidate() {
         </Card.Body>
       </Card>
 
+
+      <Modal contentClassName="modalFailure" show={showFailure} onHide={handleFailureClose} backdrop="static" keyboard={false} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Verification Failed</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>You are not authorized to attempt the test.</Modal.Body>
+        <Modal.Footer>
+          <Button variant="danger" onClick={handleFailureClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <Modal
         contentClassName="modalFailure"
         show={showError}
@@ -90,17 +111,6 @@ export default function LoginCandidate() {
         keyboard={false}
         centered
       >
-        <Modal contentClassName="modalFailure" show={showFailure} onHide={handleFailureClose} backdrop="static" keyboard={false} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Failure</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>Something Went Wrong. Try Again.</Modal.Body>
-          <Modal.Footer>
-            <Button variant="danger" onClick={handleFailureClose}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
         <Modal.Header closeButton>
           <Modal.Title>Error</Modal.Title>
         </Modal.Header>

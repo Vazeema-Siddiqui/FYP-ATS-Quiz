@@ -1,0 +1,16 @@
+span.mybadge.badge{
+    color: gray;
+    height: 30%;
+  border-radius: 20px;
+  font-weight: 600;
+  background-color: gainsboro;
+}
+
+span.mybadge.badge::before{
+    display: block;
+    content: '';
+    position: absolute;
+    margin-left: -20px;
+    z-index: -1;
+    border-radius: 40px;
+}

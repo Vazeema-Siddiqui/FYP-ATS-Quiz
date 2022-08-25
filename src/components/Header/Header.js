@@ -1,5 +1,6 @@
 import React from "react";
 import Euronetlogo from "./Euronetlogo.png";
+import "./Header.css"
 import { Container, Navbar, Badge } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleUser } from "@fortawesome/free-solid-svg-icons";
@@ -13,10 +14,11 @@ function Header(props) {
           <Navbar.Brand href="#">
             <img src={Euronetlogo} alt="Euronetlogo" />
           </Navbar.Brand>
-          <h3 style={{ alignSelf: "end", margin: "0" }}>
+          <h3 style={{  margin: "0" }}>
             {Cookies.get("candidate_email") ? (
-              <Badge bg="light" style={{ color: "gray" }}>
+              <Badge className="mybadge" bg="light" style={{ color: "gray" }}>
                 <FontAwesomeIcon icon={faCircleUser} />{" "}
+                
                 {Cookies.get("candidate_email").substring(
                   0,
                   Cookies.get("candidate_email").lastIndexOf("@")

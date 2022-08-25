@@ -7,31 +7,69 @@ import {
   ListGroupItem,
   Button,
 } from "react-bootstrap";
-import { useTimer } from "react-timer-hook";
+import Countdown from "react-countdown";
 import axios from "axios";
 import Cookies from "js-cookie";
 
 function AptTest() {
   const navigate = useNavigate();
 
-  const [test, setTest] = useState([]);
+  const [test, setTest] = useState(JSON.parse(localStorage.getItem("currentTest")) || []);
   const [choosedOption, setchoosedOption] = useState("");
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(JSON.parse(window.localStorage.getItem('currentIndex')) || 0);
   const [isSelected, setSelected] = useState(false);
   const { question, answer, category, options } = test[currentIndex] || {};
 
   var candID = Cookies.get("candidate_id");
   const [jobID, setJobID] = useState("");
 
-  const [totalScore, setTotalScore] = useState(0);
+  const [totalScore, setTotalScore] = useState(JSON.parse(window.localStorage.getItem('totalScore')) || 0);
 
   const [categorizeScore, setcategorizeScore] = useState({
-    oop: 0,
-    ds: 0,
-    gk: 0,
-    other: 0,
+    oop: JSON.parse(window.localStorage.getItem('oopScore')) || 0,
+    ds: JSON.parse(window.localStorage.getItem('dsScore')) || 0,
+    gk: JSON.parse(window.localStorage.getItem('gkScore')) || 0,
+    other: JSON.parse(window.localStorage.getItem('otherScore')) || 0,
   });
+
+
+  
+
+
+  useEffect(() => {
+    window.localStorage.setItem('currentIndex', currentIndex);
+  }, [currentIndex]);
+
+  useEffect(() => {
+    window.localStorage.setItem('totalScore', totalScore);
+  }, [totalScore]);
+
+  useEffect(() => {
+    window.localStorage.setItem('oopScore', categorizeScore.oop);
+  }, [categorizeScore.oop]);
+
+  useEffect(() => {
+    window.localStorage.setItem('dsScore', categorizeScore.ds);
+  }, [categorizeScore.ds]);
+
+  useEffect(() => {
+    window.localStorage.setItem('gkScore', categorizeScore.gk);
+  }, [categorizeScore.gk]);
+
+  useEffect(() => {
+    window.localStorage.setItem('otherScore', categorizeScore.other);
+  }, [categorizeScore.other]);
+
+  // useEffect(()=> {
+  //   console.log("currentIndex ", currentIndex);
+  //   console.log("totalScore ", totalScore);
+  //   console.log("oop ", categorizeScore.oop);
+  //   console.log("ds ", categorizeScore.ds);
+  //   console.log("gk ", categorizeScore.gk);
+  //   console.log("other ", categorizeScore.other);
+  // }, [currentIndex, totalScore, categorizeScore.oop, categorizeScore.ds, categorizeScore.gk, categorizeScore.other])
+
 
   const checkData = (ques, ans, category) => {
     if (ans == choosedOption.text) {
@@ -59,9 +97,19 @@ function AptTest() {
       });
   }, []);
 
-
   const submitTest = async (event) => {
     try {
+      console.log(
+        {
+          cand_id: candID,
+          job_id: jobID,
+          oop_score: categorizeScore.oop,
+          ds_score: categorizeScore.ds,
+          gk_score: categorizeScore.gk,
+          other_score: categorizeScore.other,
+          total_score: totalScore,
+        }
+      );
       axios
         .post(
           `https://atsbackend.herokuapp.com/api/testresult/addcandtestresult`,
@@ -77,18 +125,14 @@ function AptTest() {
         )
         .then((res) => {
           if (res.status == 200) {
-            navigate("/result", { state: { candID: candID, jobID: jobID } });
+            navigate("/result", { replace:true, state: { candID: candID, jobID: jobID } });
           } else if (res.status == 500) {
-            // handleFailureShow();
             alert("Internal Server Error: Response Status 500");
           } else {
-            // handleFailureShow();
             alert("Internal Server Error: Response Status 400");
           }
         });
     } catch (error) {
-      //   handleErrorShow();
-      //   setModalError(error);
       alert("catch error");
     }
   };
@@ -116,26 +160,13 @@ function AptTest() {
     );
   };
 
-  const MINUTES = 60 * 60;
-  const time = new Date();
-  time.setSeconds(time.getSeconds() + MINUTES);
-
-  const { seconds, minutes, hours, start } = useTimer({
-    ...(test && { expiryTimestamp: time }),
-    autoStart: false,
-    onExpire: () => submitTest(),
-  });
-
-  useEffect(() => {
-    start();
-  }, []);
-
   useEffect(function getTest() {
     axios
       .get("https://atsbackend.herokuapp.com/api/aptTest/getapttests")
       .then((response) => {
         const testData = response.data.getAllAptTest;
-        setTest(
+        // setTest(
+        const quiz =
           testData &&
           testData.map((test) => {
             return {
@@ -150,12 +181,43 @@ function AptTest() {
                 { text: test.aptTest_optionD },
               ],
             };
-          })
-        );
+          });
+        setAndSaveTest(quiz);
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
+  }, []);
+
+  const setAndSaveTest = (quiz) => {
+    setTest(quiz);
+    window.localStorage.setItem('currentTest', JSON.stringify(test));
+  }
+
+  const renderer = ({ hours, minutes, seconds }) => {
+    return (
+      <span>
+        {hours}:{minutes}:{seconds}
+      </span>
+    );
+  };
+
+  const [data, setData] = useState(
+    { date: Date.now(), delay: 3600000 }
+  );
+  const wantedDelay = 3600000;
+
+  useEffect(() => {
+    const savedTime = window.localStorage.getItem("expireTime");
+    if (savedTime != null && !isNaN(savedTime)) {
+      const currentTime = Date.now();
+      const delta = parseInt(savedTime, 10) - currentTime;
+
+      if (delta > wantedDelay) {
+      } else {
+        setData({ date: currentTime, delay: delta });
+      }
+    }
   }, []);
 
   if (!(test && options)) {
@@ -169,7 +231,20 @@ function AptTest() {
               Question: {currentIndex + 1} of {test.length}
             </h6>
             <h6>
-              {hours}:{minutes}:{seconds}
+              <Countdown
+                date={data.date + data.delay}
+                renderer={renderer}
+                onStart={(delta) => {
+                  if (window.localStorage.getItem("expireTime") == null) {
+                    window.localStorage.setItem("expireTime", JSON.stringify(data.date + data.delay));
+                  }
+                }}
+                onComplete={() => {
+                  submitTest();
+                  }
+                }
+
+              />
             </h6>
           </div>
           <Card
@@ -232,7 +307,7 @@ function AptTest() {
                 style={{
                   backgroundColor: "rgb(6, 89, 167)",
                   color: "white",
-                  
+
                 }}
                 disabled={!isSelected}
                 onClick={() => {
