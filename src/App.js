@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header/Header.js";
 import AptTest from "./components/AptitudeTest/AptTest.js";
 import "bootstrap/dist/css/bootstrap.min.css";
-import GraphicalAptTest from "./components/Result/GraphicalAptitudeTest.js"
+import GraphicalAptTest from "./components/Result/GraphicalAptitudeTest.js";
 import LoginCandidate from "./components/LoginCandidate/LoginCandidate.js";
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginCandidate />} />
           <Route path="/aptitude-test" element={<AptTest />} />
-          <Route path="/result" element={<GraphicalAptTest />} />
+          <Route path="/result/:candID/:jobID" element={<GraphicalAptTest />} />
         </Routes>
       </BrowserRouter>
     </div>

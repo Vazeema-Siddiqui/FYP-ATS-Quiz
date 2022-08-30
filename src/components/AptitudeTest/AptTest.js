@@ -14,51 +14,53 @@ import Cookies from "js-cookie";
 function AptTest() {
   const navigate = useNavigate();
 
-  const [test, setTest] = useState(JSON.parse(localStorage.getItem("currentTest")) || []);
+  const [test, setTest] = useState(
+    JSON.parse(localStorage.getItem("currentTest")) || []
+  );
   const [choosedOption, setchoosedOption] = useState("");
 
-  const [currentIndex, setCurrentIndex] = useState(JSON.parse(window.localStorage.getItem('currentIndex')) || 0);
+  const [currentIndex, setCurrentIndex] = useState(
+    JSON.parse(window.localStorage.getItem("currentIndex")) || 0
+  );
   const [isSelected, setSelected] = useState(false);
   const { question, answer, category, options } = test[currentIndex] || {};
 
   var candID = Cookies.get("candidate_id");
   const [jobID, setJobID] = useState("");
 
-  const [totalScore, setTotalScore] = useState(JSON.parse(window.localStorage.getItem('totalScore')) || 0);
+  const [totalScore, setTotalScore] = useState(
+    JSON.parse(window.localStorage.getItem("totalScore")) || 0
+  );
 
   const [categorizeScore, setcategorizeScore] = useState({
-    oop: JSON.parse(window.localStorage.getItem('oopScore')) || 0,
-    ds: JSON.parse(window.localStorage.getItem('dsScore')) || 0,
-    gk: JSON.parse(window.localStorage.getItem('gkScore')) || 0,
-    other: JSON.parse(window.localStorage.getItem('otherScore')) || 0,
+    oop: JSON.parse(window.localStorage.getItem("oopScore")) || 0,
+    ds: JSON.parse(window.localStorage.getItem("dsScore")) || 0,
+    gk: JSON.parse(window.localStorage.getItem("gkScore")) || 0,
+    other: JSON.parse(window.localStorage.getItem("otherScore")) || 0,
   });
 
-
-  
-
-
   useEffect(() => {
-    window.localStorage.setItem('currentIndex', currentIndex);
+    window.localStorage.setItem("currentIndex", currentIndex);
   }, [currentIndex]);
 
   useEffect(() => {
-    window.localStorage.setItem('totalScore', totalScore);
+    window.localStorage.setItem("totalScore", totalScore);
   }, [totalScore]);
 
   useEffect(() => {
-    window.localStorage.setItem('oopScore', categorizeScore.oop);
+    window.localStorage.setItem("oopScore", categorizeScore.oop);
   }, [categorizeScore.oop]);
 
   useEffect(() => {
-    window.localStorage.setItem('dsScore', categorizeScore.ds);
+    window.localStorage.setItem("dsScore", categorizeScore.ds);
   }, [categorizeScore.ds]);
 
   useEffect(() => {
-    window.localStorage.setItem('gkScore', categorizeScore.gk);
+    window.localStorage.setItem("gkScore", categorizeScore.gk);
   }, [categorizeScore.gk]);
 
   useEffect(() => {
-    window.localStorage.setItem('otherScore', categorizeScore.other);
+    window.localStorage.setItem("otherScore", categorizeScore.other);
   }, [categorizeScore.other]);
 
   // useEffect(()=> {
@@ -69,7 +71,6 @@ function AptTest() {
   //   console.log("gk ", categorizeScore.gk);
   //   console.log("other ", categorizeScore.other);
   // }, [currentIndex, totalScore, categorizeScore.oop, categorizeScore.ds, categorizeScore.gk, categorizeScore.other])
-
 
   const checkData = (ques, ans, category) => {
     if (ans == choosedOption.text) {
@@ -82,13 +83,15 @@ function AptTest() {
       } else {
         categorizeScore.other += 1;
       }
-      setTotalScore(prevScore => prevScore + 1);
+      setTotalScore((prevScore) => prevScore + 1);
     }
   };
 
   useEffect(function getCandDetails() {
     axios
-      .get("https://atsbackend.herokuapp.com/api/candinfo/getcandinfo/" + candID)
+      .get(
+        "https://atsbackend.herokuapp.com/api/candinfo/getcandinfo/" + candID
+      )
       .then((response) => {
         setJobID(response.data.getCand[0].job_id);
       })
@@ -97,19 +100,18 @@ function AptTest() {
       });
   }, []);
 
-  const submitTest = async (event) => {
+  const submitTest = async (e) => {
     try {
-      console.log(
-        {
-          cand_id: candID,
-          job_id: jobID,
-          oop_score: categorizeScore.oop,
-          ds_score: categorizeScore.ds,
-          gk_score: categorizeScore.gk,
-          other_score: categorizeScore.other,
-          total_score: totalScore,
-        }
-      );
+      // e.preventDefault();
+      // console.log({
+      //   cand_id: candID,
+      //   job_id: jobID,
+      //   oop_score: categorizeScore.oop,
+      //   ds_score: categorizeScore.ds,
+      //   gk_score: categorizeScore.gk,
+      //   other_score: categorizeScore.other,
+      //   total_score: totalScore,
+      // });
       axios
         .post(
           `https://atsbackend.herokuapp.com/api/testresult/addcandtestresult`,
@@ -125,7 +127,12 @@ function AptTest() {
         )
         .then((res) => {
           if (res.status == 200) {
-            navigate("/result", { replace:true, state: { candID: candID, jobID: jobID } });
+            navigate("/result/" + candID + "/" + jobID, {
+              replace: true,
+              state: { candID: candID, jobID: jobID },
+            });
+            Cookies.remove("candidate_email");
+            Cookies.remove("candidate_id");
           } else if (res.status == 500) {
             alert("Internal Server Error: Response Status 500");
           } else {
@@ -147,14 +154,14 @@ function AptTest() {
       test.map((item, index) =>
         index === indexSelected
           ? {
-            ...item,
-            selected: true,
-            options: options.map((item, index) =>
-              index === indexOptionSelected
-                ? { ...item, selected: true }
-                : { ...item, selected: false }
-            ),
-          }
+              ...item,
+              selected: true,
+              options: options.map((item, index) =>
+                index === indexOptionSelected
+                  ? { ...item, selected: true }
+                  : { ...item, selected: false }
+              ),
+            }
           : item
       )
     );
@@ -191,8 +198,8 @@ function AptTest() {
 
   const setAndSaveTest = (quiz) => {
     setTest(quiz);
-    window.localStorage.setItem('currentTest', JSON.stringify(test));
-  }
+    window.localStorage.setItem("currentTest", JSON.stringify(test));
+  };
 
   const renderer = ({ hours, minutes, seconds }) => {
     return (
@@ -202,9 +209,7 @@ function AptTest() {
     );
   };
 
-  const [data, setData] = useState(
-    { date: Date.now(), delay: 3600000 }
-  );
+  const [data, setData] = useState({ date: Date.now(), delay: 3600000 });
   const wantedDelay = 3600000;
 
   useEffect(() => {
@@ -236,14 +241,15 @@ function AptTest() {
                 renderer={renderer}
                 onStart={(delta) => {
                   if (window.localStorage.getItem("expireTime") == null) {
-                    window.localStorage.setItem("expireTime", JSON.stringify(data.date + data.delay));
+                    window.localStorage.setItem(
+                      "expireTime",
+                      JSON.stringify(data.date + data.delay)
+                    );
                   }
                 }}
                 onComplete={() => {
                   submitTest();
-                  }
-                }
-
+                }}
               />
             </h6>
           </div>
@@ -252,9 +258,7 @@ function AptTest() {
             style={{ boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px" }}
           >
             <Card.Header as="h5" style={{ textAlign: "left" }}>
-              <div
-                dangerouslySetInnerHTML={{ __html: question }}
-              />
+              <div dangerouslySetInnerHTML={{ __html: question }} />
             </Card.Header>
             <Card.Body>
               <ListGroup style={{ textAlign: "left" }}>
@@ -291,10 +295,10 @@ function AptTest() {
               <Button
                 className="btn-success col-sm-2"
                 disabled={!isSelected}
-                onClick={(e) => {
+                onClick={() => {
                   setSelected(false);
                   checkData(question, answer, category);
-                  e.preventDefault();
+                  // e.preventDefault();
                   // navigate(`/result`);
                   submitTest();
                 }}
@@ -307,7 +311,6 @@ function AptTest() {
                 style={{
                   backgroundColor: "rgb(6, 89, 167)",
                   color: "white",
-
                 }}
                 disabled={!isSelected}
                 onClick={() => {
